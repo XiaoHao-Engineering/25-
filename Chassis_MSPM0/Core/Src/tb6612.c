@@ -1,4 +1,4 @@
-#include "tb6612.h"
+﻿#include "tb6612.h"
 #include "delay.h"
 #include "ti_msp_dl_config.h"
 
@@ -21,7 +21,7 @@
 #define R2_H() DL_GPIO_setPins(R_IN2_PORT, R_IN2_PIN)
 #define R2_L() DL_GPIO_clearPins(R_IN2_PORT, R_IN2_PIN)
 
-/* PWM引脚: PA12, PA13 */
+/* PWM 引脚: PA12, PA13 */
 #define PWM_PORT  GPIOA
 #define PWM_L_PIN DL_GPIO_PIN_12
 #define PWM_R_PIN DL_GPIO_PIN_13
@@ -34,6 +34,12 @@
 static uint16_t g_SpeedL = 0, g_SpeedR = 0;
 static uint16_t g_PwmCnt = 0;
 
+/*
+ * TB6612 引脚初始化
+ *
+ * 注意: initDigitalOutput 后必须调用 enableOutput 打开 DOER,
+ *       否则 GPIO 输出驱动不会启用, 参见 MSPM0 SDK gpio_toggle_output 例程.
+ */
 void TB6612_Init(void)
 {
     DL_GPIO_initDigitalOutput(LEFT_IN1_PINCM);
@@ -44,6 +50,13 @@ void TB6612_Init(void)
     DL_GPIO_initDigitalOutput(13); /* PA13 */
     L1_L(); L2_L(); R1_L(); R2_L();
     PWM_L_L(); PWM_R_L();
+    /* 使能输出驱动 */
+    DL_GPIO_enableOutput(L_IN1_PORT, L_IN1_PIN);
+    DL_GPIO_enableOutput(L_IN2_PORT, L_IN2_PIN);
+    DL_GPIO_enableOutput(R_IN1_PORT, R_IN1_PIN);
+    DL_GPIO_enableOutput(R_IN2_PORT, R_IN2_PIN);
+    DL_GPIO_enableOutput(PWM_PORT, PWM_L_PIN);
+    DL_GPIO_enableOutput(PWM_PORT, PWM_R_PIN);
 }
 
 void TB6612_SetSpeed(uint8_t motor, int16_t speed)

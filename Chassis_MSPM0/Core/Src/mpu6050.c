@@ -1,8 +1,8 @@
-#include "mpu6050.h"
+﻿#include "mpu6050.h"
 #include "delay.h"
 #include "ti_msp_dl_config.h"
 
-/* 软件I2C: PA0=SDA, PA1=SCL */
+/* 软件 I2C: PA0=SDA, PA1=SCL */
 #define I2C_SDA_PORT GPIOA
 #define I2C_SDA_PIN  DL_GPIO_PIN_0
 #define I2C_SCL_PORT GPIOA
@@ -63,9 +63,15 @@ static void MPU_ReadRegs(uint8_t reg, uint8_t *buf, uint8_t len) {
     I2C_ReadBytes(buf, len); I2C_Stop();
 }
 
+/*
+ * 注意: initDigitalOutput 后必须调用 enableOutput 打开 DOER,
+ *       否则 GPIO 输出驱动不会启用, 参考 MSPM0 SDK 例程.
+ */
 void MPU6050_Init(void) {
     DL_GPIO_initDigitalOutput(0); SDA_HIGH();
     DL_GPIO_initDigitalOutput(1); SCL_HIGH();
+    DL_GPIO_enableOutput(I2C_SDA_PORT, I2C_SDA_PIN);
+    DL_GPIO_enableOutput(I2C_SCL_PORT, I2C_SCL_PIN);
     Delay_ms(50);
     MPU_WriteReg(PWR_MGMT_1, 0x00); Delay_ms(10);
     MPU_WriteReg(GYRO_CONFIG, 0x18);
